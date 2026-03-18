@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Scripts de Atendimento | ADS FLOW</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a2e;--bg4:#16213e;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --blue:#3b82f6;--blue2:#2563eb;--blue3:#1d4ed8;
+  --green:#10b981;--green2:#059669;
+  --orange:#f97316;--red:#ef4444;
+  --purple:#8b5cf6;--cyan:#06b6d4;
+  --border:#1e293b;--border2:#334155;
+  --radius:12px;--radius2:8px;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+a{color:var(--blue);text-decoration:none}
+
+/* HEADER */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:12px}
+.logo svg{height:36px;width:auto}
+.header-badge{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2)}
+
+/* HERO */
+.hero{text-align:center;padding:60px 24px 40px;max-width:800px;margin:0 auto}
+.hero h1{font-size:36px;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:18px;color:var(--text2);max-width:600px;margin:0 auto}
+
+/* CONTAINER */
+.container{max-width:1200px;margin:0 auto;padding:0 24px 60px}
+
+/* STEPS */
+.steps{display:flex;justify-content:center;gap:0;margin-bottom:40px}
+.step{display:flex;align-items:center;gap:8px;padding:12px 20px;color:var(--text3);font-size:14px;font-weight:600;position:relative}
+.step.active{color:var(--blue)}
+.step.done{color:var(--green)}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--border2);background:var(--bg2)}
+.step.active .step-num{border-color:var(--blue);background:var(--blue);color:#fff}
+.step.done .step-num{border-color:var(--green);background:var(--green);color:#fff}
+.step-arrow{color:var(--border2);margin:0 4px}
+
+/* FORM */
+.form-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:32px}
+.form-section h2{font-size:22px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:10px}
+.form-section h2 .icon{font-size:24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px}
+.form-group input,.form-group select,.form-group textarea{
+  background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius2);
+  padding:12px 16px;font-size:15px;color:var(--text);font-family:inherit;
+  transition:border-color .2s,box-shadow .2s;outline:none
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.15)
+}
+.form-group input::placeholder{color:var(--text3)}
+.form-group select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2394a3b8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.form-group select option{background:var(--bg2);color:var(--text)}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-hint{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--radius2);font-size:15px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{background:var(--bg4);border-color:var(--blue)}
+.btn-sm{padding:6px 12px;font-size:13px;border-radius:6px}
+.btn-copy{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-copy:hover{background:var(--bg4);color:var(--blue);border-color:var(--blue)}
+.btn-copy.copied{background:var(--green2);color:#fff;border-color:var(--green)}
+.form-actions{display:flex;justify-content:center;gap:16px;margin-top:32px}
+
+/* RESULTS */
+.results{display:none}
+.results.visible{display:block}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.results-header h2{font-size:24px;font-weight:700}
+.results-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* SCRIPT BLOCKS */
+.script-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:24px;overflow:hidden}
+.script-block-header{background:var(--bg3);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;transition:background .2s}
+.script-block-header:hover{background:var(--bg4)}
+.script-block-header h3{font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px}
+.script-block-header .badge{background:var(--blue);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.script-block-header .toggle{font-size:20px;color:var(--text3);transition:transform .2s}
+.script-block.open .toggle{transform:rotate(180deg)}
+.script-block-body{padding:0;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.script-block.open .script-block-body{max-height:5000px;padding:20px}
+
+/* MESSAGE CARD */
+.msg-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:12px;position:relative}
+.msg-card:last-child{margin-bottom:0}
+.msg-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.msg-label .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.msg-label .dot.hot{background:var(--orange)}
+.msg-label .dot.warm{background:#eab308}
+.msg-label .dot.cold{background:var(--blue)}
+.msg-label .dot.obj{background:var(--red)}
+.msg-label .dot.schedule{background:var(--green)}
+.msg-label .dot.followup{background:var(--purple)}
+.msg-label .dot.post{background:var(--cyan)}
+.msg-text{font-size:14px;line-height:1.7;color:var(--text);white-space:pre-wrap}
+.msg-text strong{color:var(--blue)}
+.msg-copy{position:absolute;top:12px;right:12px}
+
+/* FOLLOW-UP TIMELINE */
+.timeline{display:flex;align-items:center;gap:0;margin:16px 0 8px;flex-wrap:wrap}
+.timeline-item{display:flex;align-items:center}
+.timeline-dot{width:32px;height:32px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.timeline-line{width:40px;height:2px;background:var(--border2)}
+.timeline-label{font-size:11px;color:var(--text3);text-align:center;margin-top:4px}
+.timeline-col{display:flex;flex-direction:column;align-items:center}
+
+/* WHATSAPP BUTTON */
+.wpp-float{position:fixed;bottom:24px;right:24px;z-index:200}
+.wpp-btn{display:flex;align-items:center;gap:10px;background:#25D366;color:#fff;padding:14px 24px;border-radius:50px;font-size:15px;font-weight:600;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:all .2s;text-decoration:none;border:none;cursor:pointer}
+.wpp-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,211,102,.5)}
+.wpp-btn svg{width:22px;height:22px;fill:#fff}
+
+/* FOOTER */
+.footer{text-align:center;padding:40px 24px;color:var(--text3);font-size:13px;border-top:1px solid var(--border)}
+.footer a{color:var(--blue)}
+
+/* TOAST */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--green);color:#fff;padding:12px 24px;border-radius:var(--radius2);font-size:14px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:300;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .form-grid{grid-template-columns:1fr}
+  .hero h1{font-size:26px}
+  .hero p{font-size:15px}
+  .steps{flex-wrap:wrap;justify-content:center}
+  .step-text{display:none}
+  .results-header{flex-direction:column;align-items:flex-start}
+  .header-badge{display:none}
+  .timeline-line{width:20px}
+}
+
+/* PRINT */
+@media print{
+  .header,.wpp-float,.btn-copy,.form-section,.steps,.form-actions,.results-actions,.footer,.toast{display:none!important}
+  .results{display:block!important}
+  .script-block-body{max-height:none!important;padding:16px!important}
+  body{background:#fff;color:#000}
+  .script-block,.msg-card{border-color:#ccc;background:#fff}
+  .script-block-header{background:#f5f5f5}
+  .msg-text{color:#000}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <svg viewBox="0 0 220 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:36px;width:auto">
+        <!-- Ícone: quadrado com triângulo invertido -->
+        <rect x="2" y="4" width="40" height="40" rx="2" stroke="#c8ced6" stroke-width="3" fill="none"/>
+        <polygon points="8,12 36,12 22,36" fill="#c8ced6"/>
+        <!-- Texto: Ads Flow -->
+        <text x="54" y="36" font-family="'Segoe UI',system-ui,sans-serif" font-size="32" font-weight="800" fill="#d0d5dc" letter-spacing="-0.5">Ads Flow</text>
+      </svg>
+    </div>
+    <div class="header-badge">Gerador de Scripts v1.0</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Gerador de Scripts de Atendimento e Follow-up</h1>
+  <p>Preencha os dados do seu negócio e receba scripts profissionais personalizados, prontos para copiar e usar.</p>
+</section>
+
+<div class="container">
+
+  <!-- STEPS -->
+  <div class="steps">
+    <div class="step active" id="step1">
+      <div class="step-num">1</div>
+      <span class="step-text">Dados do negócio</span>
+    </div>
+    <span class="step-arrow">→</span>
+    <div class="step" id="step2">
+      <div class="step-num">2</div>
+      <span class="step-text">Scripts gerados</span>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-section" id="formSection">
+    <h2><span class="icon">📋</span> Dados do seu negócio</h2>
+    <form id="scriptForm">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="empresa">Nome da empresa</label>
+          <input type="text" id="empresa" placeholder="Ex: Clínica Nutrigene" required>
+        </div>
+        <div class="form-group">
+          <label for="segmento">Segmento</label>
+          <select id="segmento" required>
+            <option value="">Selecione...</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Fitness">Fitness</option>
+            <option value="Pet">Pet</option>
+            <option value="Gastronomia">Gastronomia</option>
+            <option value="Estética">Estética</option>
+            <option value="Automotivo">Automotivo</option>
+            <option value="Educação">Educação</option>
+            <option value="Serviços">Serviços</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="atendente">Nome do(a) atendente</label>
+          <input type="text" id="atendente" placeholder="Ex: Madu" required>
+        </div>
+        <div class="form-group">
+          <label for="servico">Serviço principal</label>
+          <input type="text" id="servico" placeholder="Ex: Consulta de Nutrigenômica" required>
+        </div>
+        <div class="form-group">
+          <label for="preco">Faixa de preço</label>
+          <input type="text" id="preco" placeholder="Ex: R$ 350,00">
+        </div>
+        <div class="form-group">
+          <label for="diferencial">Diferencial</label>
+          <input type="text" id="diferencial" placeholder="Ex: Análise genética personalizada">
+        </div>
+        <div class="form-group">
+          <label for="tom">Tom de comunicação</label>
+          <select id="tom" required>
+            <option value="">Selecione...</option>
+            <option value="Formal">Formal</option>
+            <option value="Informal">Informal</option>
+            <option value="Mix">Mix (Profissional mas acolhedor)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="canal">Canal principal</label>
+          <select id="canal" required>
+            <option value="">Selecione...</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Telefone">Telefone</option>
+            <option value="Ambos">Ambos</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label for="horarios">Horários disponíveis</label>
+          <input type="text" id="horarios" placeholder="Ex: Segunda a Sexta, 8h às 18h" required>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="preencherExemplo()">Preencher exemplo</button>
+        <button type="submit" class="btn btn-primary">Gerar Scripts →</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="results-header">
+      <h2>Scripts para <span id="nomeEmpresa" style="color:var(--blue)"></span></h2>
+      <div class="results-actions">
+        <button class="btn btn-secondary btn-sm" onclick="copiarTudo()">📋 Copiar tudo</button>
+        <button class="btn btn-secondary btn-sm" onclick="baixarHTML()">⬇ Baixar HTML</button>
+        <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimir</button>
+        <button class="btn btn-primary btn-sm" onclick="voltarForm()">← Novo script</button>
+      </div>
+    </div>
+    <div id="scriptsContainer"></div>
+  </div>
+
+</div>
+
+<!-- WHATSAPP FLOAT -->
+<a class="wpp-float" href="https://wa.me/5549999708521?text=Ol%C3%A1!%20Vim%20pelo%20Gerador%20de%20Scripts%20e%20quero%20saber%20mais%20sobre%20o%20ADS%20FLOW." target="_blank" rel="noopener">
+  <div class="wpp-btn">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Fale com a ADS FLOW
+  </div>
+</a>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>Feito com ❤ por <a href="https://wa.me/5549999708521" target="_blank">ADS FLOW</a> — Gestão de tráfego pago que gera resultados.</p>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// GERADOR DE SCRIPTS DE ATENDIMENTO — ADS FLOW
+// 100% client-side, zero dependências
+// ═══════════════════════════════════════════════════════
+
+const form = document.getElementById('scriptForm');
+const formSection = document.getElementById('formSection');
+const results = document.getElementById('results');
+
+// ── Saudações por tom ──
+var SAUDACAO = {
+  'Formal': { ola: 'Olá', tudo: 'como vai?', agradeco: 'Agradeço pelo seu contato' },
+  'Informal': { ola: 'Oi', tudo: 'tudo bem?', agradeco: 'Que bom que entrou em contato' },
+  'Mix': { ola: 'Olá', tudo: 'tudo bem?', agradeco: 'Obrigada pelo contato' }
+};
+
+// ── Benefício por segmento ──
+var BENEFICIO_SEGMENTO = {
+  'Saúde': 'na sua saúde e bem-estar',
+  'Fitness': 'na sua saúde e performance',
+  'Pet': 'no cuidado e bem-estar do seu pet',
+  'Gastronomia': 'em uma experiência gastronômica única',
+  'Estética': 'na sua autoestima e bem-estar',
+  'Automotivo': 'na valorização e conservação do seu veículo',
+  'Educação': 'no seu desenvolvimento pessoal e profissional',
+  'Serviços': 'em um serviço de qualidade e confiança',
+  'Outro': 'em qualidade e resultado'
+};
+
+// ── Form submit ──
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  var d = {
+    empresa: val('empresa'),
+    segmento: val('segmento'),
+    atendente: val('atendente'),
+    servico: val('servico'),
+    preco: val('preco') || 'consulte-nos',
+    diferencial: val('diferencial') || '',
+    tom: val('tom'),
+    canal: val('canal'),
+    horarios: val('horarios')
+  };
+  gerarScripts(d);
+});
+
+function val(id) { return document.getElementById(id).value.trim(); }
+
+// ── Preencher exemplo ──
+function preencherExemplo() {
+  document.getElementById('empresa').value = 'Clínica Nutrigene';
+  document.getElementById('segmento').value = 'Saúde';
+  document.getElementById('atendente').value = 'Madu';
+  document.getElementById('servico').value = 'Consulta de Nutrigenômica';
+  document.getElementById('preco').value = 'R$ 350,00';
+  document.getElementById('diferencial').value = 'Análise genética personalizada';
+  document.getElementById('tom').value = 'Mix';
+  document.getElementById('canal').value = 'WhatsApp';
+  document.getElementById('horarios').value = 'Segunda a Sexta, 8h às 18h';
+}
+
+// ═══════════════════════════════════════════════════════
+// GERAR SCRIPTS
+// ═══════════════════════════════════════════════════════
+function gerarScripts(d) {
+  var s = SAUDACAO[d.tom];
+  var canalTexto = d.canal === 'Ambos' ? 'WhatsApp ou telefone' : d.canal;
+  var beneficio = BENEFICIO_SEGMENTO[d.segmento] || BENEFICIO_SEGMENTO['Outro'];
+
+  // Step indicators
+  document.getElementById('step1').className = 'step done';
+  document.getElementById('step2').className = 'step active';
+  document.getElementById('nomeEmpresa').textContent = d.empresa;
+
+  var html = '';
+
+  // ════════════════════════════════════════
+  // BLOCO 1: PRIMEIRO ATENDIMENTO
+  // ════════════════════════════════════════
+  html += bloco('1', '💬', 'Primeiro Atendimento', '9 variações', [
+
+    // ── LEAD QUENTE (2 variações) ──
+    msgCard('hot', 'Lead quente — quer agendar (variação 1)',
+      s.ola + ', ' + s.tudo + ' Aqui é a ' + d.atendente + ', da *' + d.empresa + '*. 😊\n\n' +
+      'Que bom que você se interessou pelo nosso serviço de ' + d.servico + '!\n\n' +
+      'Temos horários disponíveis esta semana. Nosso funcionamento é de ' + d.horarios + '.\n\n' +
+      'Qual dia e horário fica melhor para você?'
+    ),
+    msgCard('hot', 'Lead quente — quer agendar (variação 2)',
+      s.ola + '! Aqui é a ' + d.atendente + ', da *' + d.empresa + '*. 😊\n\n' +
+      'Fico muito feliz com o seu interesse em *' + d.servico + '*! Você vai adorar a experiência.\n\n' +
+      (d.diferencial ? 'Aqui trabalhamos com ' + d.diferencial + ', e isso faz toda a diferença no resultado.\n\n' : '') +
+      'Posso verificar os melhores horários para você. Temos disponibilidade de ' + d.horarios + '.\n\n' +
+      'Tem alguma preferência de dia ou período?'
+    ),
+
+    // ── LEAD MORNO (4 variações) ──
+    msgCard('warm', 'Lead morno — apresentação + valor (variação 1)',
+      s.ola + ', ' + s.tudo + ' Aqui é a ' + d.atendente + ', da *' + d.empresa + '*. 😊\n\n' +
+      s.agradeco + '!\n\n' +
+      'Antes de falar sobre valores, deixa eu te contar um pouco sobre como funciona o nosso serviço de ' + d.servico + ':\n\n' +
+      (d.diferencial ? '🔹 Trabalhamos com ' + d.diferencial + '\n' : '') +
+      '🔹 Atendimento personalizado para cada pessoa\n' +
+      '🔹 Equipe com experiência e especialização na área\n\n' +
+      'O investimento é de *' + d.preco + '*, e inclui todo esse acompanhamento.\n\n' +
+      'Gostaria de saber mais detalhes ou já quer verificar os horários disponíveis?'
+    ),
+    msgCard('warm', 'Lead morno — foco no diferencial (variação 2)',
+      s.ola + '! Aqui é a ' + d.atendente + ', da *' + d.empresa + '*. ' + s.tudo.charAt(0).toUpperCase() + s.tudo.slice(1) + '\n\n' +
+      s.agradeco + '! Vou te explicar o que torna o nosso serviço de ' + d.servico + ' especial. 😊\n\n' +
+      (d.diferencial
+        ? 'O grande diferencial da ' + d.empresa + ' é ' + d.diferencial + '. Isso significa que o seu atendimento vai ser totalmente voltado para as suas necessidades e objetivos.'
+        : 'Aqui na ' + d.empresa + ' cada atendimento é pensado de forma individual, levando em conta as suas necessidades específicas.') + '\n\n' +
+      'Nossos clientes percebem a diferença logo na primeira visita.\n\n' +
+      'Posso te passar mais detalhes sobre valores e disponibilidade?'
+    ),
+    msgCard('warm', 'Lead morno — prova social + valor (variação 3)',
+      s.ola + ', ' + s.tudo + ' Aqui é a ' + d.atendente + ', da *' + d.empresa + '*.\n\n' +
+      s.agradeco + '! 😊\n\n' +
+      'Muitas pessoas nos procuram exatamente com essa dúvida sobre valores, e é muito bom que você esteja pesquisando.\n\n' +
+      'O que posso adiantar é que *' + d.servico + '* na ' + d.empresa + ' vai muito além do básico:' +
+      (d.diferencial ? '\n\n✨ Contamos com ' + d.diferencial + ', algo que tem feito uma diferença enorme nos resultados dos nossos clientes.' : '\n\n✨ Nosso atendimento é reconhecido pela qualidade e pelo cuidado com cada detalhe.') + '\n\n' +
+      'O investimento é de *' + d.preco + '*.\n\n' +
+      'Quer que eu explique melhor o que está incluso? Posso também verificar os horários disponíveis para você.'
+    ),
+    msgCard('warm', 'Lead morno — sem mencionar valor (variação 4)',
+      s.ola + '! Aqui é a ' + d.atendente + ', da *' + d.empresa + '*. ' + s.tudo.charAt(0).toUpperCase() + s.tudo.slice(1) + '\n\n' +
+      s.agradeco + '! 😊\n\n' +
+      'Antes de falar sobre valores, quero entender melhor o que você está buscando para poder te orientar da melhor forma.\n\n' +
+      (d.diferencial ? 'Aqui na ' + d.empresa + ' trabalhamos com ' + d.diferencial + ', e cada caso é avaliado de forma individual.\n\n' : '') +
+      'Pode me contar um pouquinho sobre o que te levou a buscar por ' + d.servico + '? Assim consigo te indicar exatamente o melhor caminho. 😊'
+    ),
+
+    // ── LEAD FRIO (3 variações) ──
+    msgCard('cold', 'Lead frio — informativo completo (variação 1)',
+      s.ola + ', ' + s.tudo + ' Aqui é a ' + d.atendente + ', da *' + d.empresa + '*.\n\n' +
+      s.agradeco + '! Vou te passar um resumo sobre o nosso trabalho. 😊\n\n' +
+      '*Sobre ' + d.servico + ':*\n' +
+      (d.diferencial ? 'Aqui na ' + d.empresa + ' contamos com ' + d.diferencial + '. ' : '') +
+      'Nosso foco é oferecer um atendimento personalizado, com profissionais especializados e muita atenção a cada detalhe.\n\n' +
+      '*O que nos diferencia:*\n' +
+      '✅ Equipe qualificada e atualizada\n' +
+      '✅ Atendimento humanizado e individualizado\n' +
+      '✅ Ambiente preparado para a sua melhor experiência\n\n' +
+      '*Funcionamento:* ' + d.horarios + '\n' +
+      '*Investimento:* ' + d.preco + '\n\n' +
+      'Ficou com alguma dúvida? Estou à disposição!'
+    ),
+    msgCard('cold', 'Lead frio — despertar curiosidade (variação 2)',
+      s.ola + '! Aqui é a ' + d.atendente + ', da *' + d.empresa + '*. ' + s.tudo.charAt(0).toUpperCase() + s.tudo.slice(1) + '\n\n' +
+      s.agradeco + '! 😊\n\n' +
+      'Fico feliz pelo seu interesse! *' + d.servico + '* é um dos nossos serviços mais procurados' +
+      (d.diferencial ? ', principalmente por conta do nosso diferencial em ' + d.diferencial + '.' : '.') + '\n\n' +
+      'Muitos clientes nos contam que gostariam de ter conhecido a ' + d.empresa + ' antes, pela diferença que perceberam no resultado.\n\n' +
+      'Posso te explicar melhor como funciona na prática? Tenho certeza de que vai te interessar!'
+    ),
+    msgCard('cold', 'Lead frio — convite para conhecer (variação 3)',
+      s.ola + ', ' + s.tudo + ' Aqui é a ' + d.atendente + ', da *' + d.empresa + '*.\n\n' +
+      s.agradeco + '! 😊\n\n' +
+      'Sei que quando estamos pesquisando, é importante entender bem o que cada lugar oferece. Então vou ser bem transparente:\n\n' +
+      (d.diferencial ? 'O nosso maior diferencial é ' + d.diferencial + '. Isso nos permite entregar um resultado muito mais personalizado e eficiente.\n\n' : '') +
+      'Trabalhamos com ' + d.servico + ' de ' + d.horarios + ', e o investimento é a partir de *' + d.preco + '*.\n\n' +
+      'Mas mais do que ler sobre, o ideal é conhecer de perto. Gostaria de agendar uma visita sem compromisso para entender melhor como trabalhamos?'
+    )
+  ]);
+
+  // ════════════════════════════════════════
+  // BLOCO 2: QUEBRA DE OBJEÇÕES
+  // ════════════════════════════════════════
+  html += bloco('2', '🛡️', 'Quebra de Objeções', '4 cenários', [
+    msgCard('obj', '"Está caro" / "Vou pesquisar"',
+      'Entendo! É natural querer avaliar antes de decidir. 😊\n\n' +
+      'O que posso dizer é que *' + d.servico + '* é um investimento ' + beneficio + '.' +
+      (d.diferencial ? ' Além disso, contamos com ' + d.diferencial + ', o que faz toda a diferença no resultado.' : '') + '\n\n' +
+      'Nossos clientes costumam perceber o valor já na primeira experiência.\n\n' +
+      'Que tal conhecer de perto, sem compromisso? Posso reservar um horário para você.'
+    ),
+    msgCard('obj', '"Vou pensar" / "Preciso consultar alguém"',
+      'Claro, fique à vontade! É importante tomar essa decisão com calma. 😊\n\n' +
+      (d.diferencial ? 'Só quero reforçar que aqui na ' + d.empresa + ' oferecemos ' + d.diferencial + ', que é algo que poucos lugares têm.' : 'Só quero reforçar que a ' + d.empresa + ' tem um atendimento diferenciado, voltado para o seu resultado.') + '\n\n' +
+      'Se surgir qualquer dúvida, pode me chamar a qualquer momento pelo ' + canalTexto + '.\n\n' +
+      'Posso retornar em alguns dias para saber se conseguiu decidir?'
+    ),
+    msgCard('obj', '"Não tenho tempo agora"',
+      'Sem problemas! Sabemos como a rotina pode ser corrida. 😊\n\n' +
+      'Aqui na ' + d.empresa + ' temos horários flexíveis justamente para facilitar: *' + d.horarios + '*.\n\n' +
+      'Quer que eu veja qual o melhor horário para encaixar na sua agenda? Assim já deixamos reservado para quando for mais conveniente. 📅'
+    ),
+    msgCard('obj', '"Já tenho outro profissional"',
+      'Que bom que você já tem esse cuidado! Isso mostra o quanto valoriza a qualidade. 😊\n\n' +
+      'Aqui na ' + d.empresa + ' temos uma proposta um pouco diferente' +
+      (d.diferencial ? ': trabalhamos com ' + d.diferencial : '') + '.\n\n' +
+      'Muitos dos nossos clientes já passaram por outros profissionais antes e perceberam diferença no resultado.\n\n' +
+      'Gostaria de conhecer o nosso trabalho sem nenhum compromisso? Assim você pode comparar e decidir o que faz mais sentido para você.'
+    )
+  ]);
+
+  // ════════════════════════════════════════
+  // BLOCO 3: AGENDAMENTO
+  // ════════════════════════════════════════
+  html += bloco('3', '📅', 'Agendamento', '3 mensagens', [
+    msgCard('schedule', 'Confirmação de horário',
+      'Tudo certo! Seu agendamento está confirmado: ✅\n\n' +
+      '📍 *' + d.empresa + '*\n' +
+      '📅 [DATA]\n' +
+      '🕐 [HORÁRIO]\n' +
+      '💼 ' + d.servico + '\n\n' +
+      'Caso precise remarcar ou tenha alguma dúvida antes do dia, é só me avisar por aqui.'
+    ),
+    msgCard('schedule', 'Lembrete de véspera',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '. 😊\n\n' +
+      'Passando para lembrar que amanhã você tem horário marcado conosco:\n\n' +
+      '🕐 [HORÁRIO]\n' +
+      '💼 ' + d.servico + '\n\n' +
+      'Consigo confirmar a sua presença?'
+    ),
+    msgCard('schedule', 'Confirmação no dia',
+      'Bom dia! 😊\n\n' +
+      'Seu horário na ' + d.empresa + ' é hoje, às *[HORÁRIO]*.\n\n' +
+      'Estamos aguardando você! Se surgir algum imprevisto, é só avisar por aqui.'
+    )
+  ]);
+
+  // ════════════════════════════════════════
+  // BLOCO 4: FOLLOW-UP (5 mensagens)
+  // ════════════════════════════════════════
+  var timelineHTML = '<div class="timeline">';
+  var fDias = [1, 3, 7, 14, 29];
+  for (var i = 0; i < fDias.length; i++) {
+    timelineHTML += '<div class="timeline-col"><div class="timeline-dot">F' + (i+1) + '</div><div class="timeline-label">+' + fDias[i] + 'd</div></div>';
+    if (i < fDias.length - 1) timelineHTML += '<div class="timeline-item"><div class="timeline-line"></div></div>';
+  }
+  timelineHTML += '</div>';
+
+  html += bloco('4', '🔄', 'Cadência de Follow-up', '5 mensagens', [
+    timelineHTML,
+    msgCard('followup', 'F1 — +1 dia após primeiro contato',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '. ' + s.tudo.charAt(0).toUpperCase() + s.tudo.slice(1) + '\n\n' +
+      'Ontem conversamos sobre *' + d.servico + '* e gostaria de saber se ficou com alguma dúvida.\n\n' +
+      'Estou à disposição para ajudar no que precisar! 😊'
+    ),
+    msgCard('followup', 'F2 — +3 dias',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '. 😊\n\n' +
+      'Estou passando para saber se você conseguiu pensar sobre *' + d.servico + '*.\n\n' +
+      'Ainda temos horários disponíveis esta semana, caso queira agendar.\n\n' +
+      'Nosso funcionamento: ' + d.horarios + '.'
+    ),
+    msgCard('followup', 'F3 — +7 dias',
+      s.ola + '! ' + s.tudo.charAt(0).toUpperCase() + s.tudo.slice(1) + ' 😊\n\n' +
+      'Faz uma semana que conversamos sobre *' + d.servico + '* aqui na ' + d.empresa + '.\n\n' +
+      (d.diferencial ? 'Gostaria de reforçar que contamos com ' + d.diferencial + ', algo que tem feito muita diferença para os nossos clientes.' : 'Nossos clientes têm obtido resultados muito positivos e gostaríamos que você também pudesse aproveitar.') + '\n\n' +
+      'Caso tenha interesse, posso reservar um horário especial para você!'
+    ),
+    msgCard('followup', 'F4 — +14 dias',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '. 😊\n\n' +
+      'Sei que o dia a dia é corrido, mas gostaria de lembrar que continuamos à disposição caso precise do nosso serviço de ' + d.servico + '.\n\n' +
+      'Nosso atendimento funciona de ' + d.horarios + '.\n\n' +
+      'Se precisar de algo, é só me chamar por aqui!'
+    ),
+    msgCard('followup', 'F5 — +29 dias (última tentativa)',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '.\n\n' +
+      'Há cerca de um mês você demonstrou interesse no nosso serviço de ' + d.servico + ', e gostaria de saber se ainda posso ajudar de alguma forma.\n\n' +
+      'Caso tenha interesse, ficarei feliz em verificar os horários disponíveis para você. Caso não seja o momento, tudo bem — desejo o melhor! 😊\n\n' +
+      'A ' + d.empresa + ' estará sempre de portas abertas.'
+    )
+  ]);
+
+  // ════════════════════════════════════════
+  // BLOCO 5: PÓS-ATENDIMENTO
+  // ════════════════════════════════════════
+  html += bloco('5', '⭐', 'Pós-atendimento', '2 mensagens', [
+    msgCard('post', 'Agradecimento após consulta/visita',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '. 😊\n\n' +
+      'Gostaria de agradecer pela sua visita hoje. Foi um prazer receber você!\n\n' +
+      'Se surgir qualquer dúvida sobre ' + d.servico + ', pode me chamar a qualquer momento pelo ' + canalTexto + '.\n\n' +
+      'Até a próxima!'
+    ),
+    msgCard('post', 'Pedido de avaliação/feedback',
+      s.ola + '! Aqui é a ' + d.atendente + ', da ' + d.empresa + '. ' + s.tudo.charAt(0).toUpperCase() + s.tudo.slice(1) + '\n\n' +
+      'A sua opinião é muito importante para nós e nos ajuda a melhorar cada vez mais.\n\n' +
+      'Você poderia deixar uma avaliação sobre a sua experiência? Leva menos de 1 minuto:\n\n' +
+      '⭐ [LINK DA AVALIAÇÃO]\n\n' +
+      'Agradecemos muito! 😊'
+    )
+  ]);
+
+  // Renderiza
+  document.getElementById('scriptsContainer').innerHTML = html;
+  formSection.style.display = 'none';
+  results.classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Abre o primeiro bloco
+  setTimeout(function() {
+    var primeiro = document.querySelector('.script-block');
+    if (primeiro) primeiro.classList.add('open');
+  }, 300);
+}
+
+// ── Helpers de HTML ──
+function bloco(num, icon, titulo, badge, cards) {
+  var inner = '';
+  for (var i = 0; i < cards.length; i++) inner += cards[i];
+  return '<div class="script-block">' +
+    '<div class="script-block-header" onclick="toggleBloco(this)">' +
+      '<h3>' + icon + ' ' + num + '. ' + titulo + ' <span class="badge">' + badge + '</span></h3>' +
+      '<span class="toggle">▼</span>' +
+    '</div>' +
+    '<div class="script-block-body">' + inner + '</div>' +
+  '</div>';
+}
+
+function msgCard(tipo, label, texto) {
+  var id = 'msg-' + Math.random().toString(36).substr(2, 6);
+  return '<div class="msg-card">' +
+    '<div class="msg-label"><span class="dot ' + tipo + '"></span>' + label + '</div>' +
+    '<div class="msg-text" id="' + id + '">' + escapeHTML(texto) + '</div>' +
+    '<div class="msg-copy"><button class="btn btn-copy btn-sm" onclick="copiarMsg(\'' + id + '\', this)">📋 Copiar</button></div>' +
+  '</div>';
+}
+
+function escapeHTML(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Toggle bloco ──
+function toggleBloco(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+// ── Copiar mensagem individual ──
+function copiarMsg(id, btn) {
+  var texto = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(texto).then(function() {
+    btn.classList.add('copied');
+    btn.innerHTML = '✓ Copiado';
+    showToast('Mensagem copiada!');
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      btn.innerHTML = '📋 Copiar';
+    }, 2000);
+  });
+}
+
+// ── Copiar tudo ──
+function copiarTudo() {
+  var msgs = document.querySelectorAll('.msg-text');
+  var labels = document.querySelectorAll('.msg-label');
+  var texto = '';
+  for (var i = 0; i < msgs.length; i++) {
+    texto += '=== ' + labels[i].innerText + ' ===\n';
+    texto += msgs[i].innerText + '\n\n';
+  }
+  navigator.clipboard.writeText(texto).then(function() {
+    showToast('Todos os scripts copiados!');
+  });
+}
+
+// ── Baixar HTML ──
+function baixarHTML() {
+  var conteudo = document.getElementById('scriptsContainer').innerHTML;
+  var empresa = document.getElementById('nomeEmpresa').textContent;
+  var html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Scripts - ' + empresa + '</title>' +
+    '<style>body{font-family:Segoe UI,sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#fff;color:#111}' +
+    '.msg-card{border:1px solid #ddd;border-radius:8px;padding:16px;margin:12px 0}' +
+    '.msg-label{font-weight:bold;margin-bottom:8px;color:#333}' +
+    '.msg-text{line-height:1.7;white-space:pre-wrap}' +
+    '.script-block{margin:20px 0;border:1px solid #ccc;border-radius:8px;overflow:hidden}' +
+    '.script-block-header{background:#f5f5f5;padding:14px 16px}' +
+    '.script-block-header h3{margin:0;font-size:16px}' +
+    '.script-block-body{padding:16px;max-height:none!important}' +
+    '.badge{background:#3b82f6;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px}' +
+    '.btn-copy,.toggle,.dot,.timeline{display:none}' +
+    'h1{text-align:center;margin-bottom:24px}</style></head><body>' +
+    '<h1>Scripts de Atendimento — ' + empresa + '</h1>' + conteudo + '</body></html>';
+
+  var blob = new Blob([html], { type: 'text/html' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'scripts-' + empresa.toLowerCase().replace(/\s+/g, '-') + '.html';
+  a.click();
+  showToast('Arquivo baixado!');
+}
+
+// ── Voltar ao form ──
+function voltarForm() {
+  formSection.style.display = '';
+  results.classList.remove('visible');
+  document.getElementById('step1').className = 'step active';
+  document.getElementById('step2').className = 'step';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Toast ──
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+</script>
+</body>
+</html>
